@@ -9,12 +9,12 @@
 %global pecl_name memcache
 %global real_name php-pecl-memcache
 %global basever 3
-%global php_base php54
+%global php_base php55u
 
 Summary: Extension to work with the Memcached caching daemon
 Name: %{php_base}-pecl-memcache
 Version: 3.0.8
-Release: 1.ius%{?dist}
+Release: 2.ius%{?dist}
 License: PHP
 Group: Development/Languages
 Vendor: IUS Community Project
@@ -50,7 +50,7 @@ Memcache can be used as a PHP session handler.
 
 %prep 
 %setup -c -n %{real_name}-%{version} -q
-%{_bindir}/php -n %{SOURCE2} package.xml >CHANGELOG
+%{_bindir}/php %{SOURCE2} package.xml >CHANGELOG
 
 
 %build
@@ -123,6 +123,11 @@ fi
 
 
 %changelog
+* Mon Jan  6 2014 Mark McKinstry <mmckinst@nexcess.net> - 0:3.0.8-2.ius
+- modify php54 spec for php55u
+- take out -n flag when running xml2changelog since we need to load php.ini to
+  get simplexml support
+
 * Mon Apr 08 2013 Ben Harper <ben.harper@rackspace.com> - 0:3.0.8-1.ius
 - Latest sources from upstream. Full changelog available at:
   http://pecl.php.net/package-changelog.php?package=memcache&release=3.0.8
