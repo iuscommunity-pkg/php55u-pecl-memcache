@@ -6,7 +6,7 @@
 Summary: Extension to work with the Memcached caching daemon
 Name: %{php_base}-pecl-memcache
 Version: 3.0.8
-Release: 2.ius%{?dist}
+Release: 3.ius%{?dist}
 License: PHP
 Group: Development/Languages
 Vendor: IUS Community Project
@@ -145,6 +145,7 @@ done
     --define extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
     -m | grep %{pecl_name}
 
+
 %post
 %{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
 
@@ -167,6 +168,16 @@ fi
 
 
 %changelog
+* Thu Oct 09 2014 Carl George <carl.george@rackspace.com> - 3.0.8-3.ius
+- Sync with Fedora package
+- Clean up requires/buildrequires/provides
+- Add numerical prefix to extension configuration file
+- Install doc in pecl_docdir
+- Install tests in pecl_testdir
+- Enable ZTS build
+- Add filter_provides to avoid private-shared-object-provides memcache.so
+- Add minimal load test in %%check
+
 * Mon Jan  6 2014 Mark McKinstry <mmckinst@nexcess.net> - 0:3.0.8-2.ius
 - modify php54 spec for php55u
 - take out -n flag when running xml2changelog since we need to load php.ini to
