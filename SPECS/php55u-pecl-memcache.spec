@@ -23,7 +23,6 @@ URL: http://pecl.php.net/package/%{pecl_name}
 Source: http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 Source2: xml2changelog
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: %{php_base}-devel, %{php_base}-cli, %{php_base}-pear, zlib-devel
 Provides: php-pecl(%{pecl_name}) = %{version}-%{release}
 Provides: %{real_name} = %{version}-%{release}
@@ -62,7 +61,6 @@ phpize
 
 %install
 cd %{pecl_name}-%{version}
-%{__rm} -rf %{buildroot}
 %{__make} install INSTALL_ROOT=%{buildroot}
 
 # Drop in the bit of configuration
@@ -100,10 +98,6 @@ EOF
 %{__install} -m 644 ../package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
 
 
-%clean
-%{__rm} -rf %{buildroot}
-
-
 %post
 %{__pecl} install --nodeps --soft --force --register-only --nobuild %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
 
@@ -115,7 +109,6 @@ fi
 
 
 %files
-%defattr(-, root, root, -)
 %doc CHANGELOG %{pecl_name}-%{version}/CREDITS %{pecl_name}-%{version}/README %{pecl_name}-%{version}/example.php
 %config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
