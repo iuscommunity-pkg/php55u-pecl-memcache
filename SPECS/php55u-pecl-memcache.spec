@@ -1,5 +1,6 @@
 %global pecl_name memcache
 %global real_name php-pecl-memcache
+%global ini_name  40-%{pecl_name}.ini
 %global php_base php55u
 
 Summary: Extension to work with the Memcached caching daemon
@@ -67,8 +68,8 @@ cd %{pecl_name}-%{version}
 %{__make} install INSTALL_ROOT=%{buildroot}
 
 # Drop in the bit of configuration
-%{__mkdir_p} %{buildroot}%{_sysconfdir}/php.d
-%{__cat} > %{buildroot}%{_sysconfdir}/php.d/%{pecl_name}.ini << 'EOF'
+%{__mkdir_p} %{buildroot}%{php_inidir}
+%{__cat} > %{buildroot}%{php_inidir}/%{ini_name} << 'EOF'
 ; Enable %{pecl_name} extension module
 extension=%{pecl_name}.so
 
@@ -113,9 +114,9 @@ fi
 
 %files
 %doc CHANGELOG %{pecl_name}-%{version}/CREDITS %{pecl_name}-%{version}/README %{pecl_name}-%{version}/example.php
-%config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
+%{pecl_xmldir}/%{name}.xml
+%config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
-%{pecl_xmldir}/%{pecl_name}.xml
 
 
 %changelog
