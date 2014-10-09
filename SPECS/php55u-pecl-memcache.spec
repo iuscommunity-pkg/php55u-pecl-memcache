@@ -1,14 +1,5 @@
-%{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
-%{!?pecl_phpdir: %{expand: %%global pecl_phpdir  %(%{__pecl} config-get php_dir  2> /dev/null || echo undefined)}}
-%{?!pecl_xmldir: %{expand: %%global pecl_xmldir %{pecl_phpdir}/.pkgxml}}
-
-%{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
-%global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
-
-
 %global pecl_name memcache
 %global real_name php-pecl-memcache
-%global basever 3
 %global php_base php55u
 
 Summary: Extension to work with the Memcached caching daemon
@@ -28,13 +19,8 @@ BuildRequires: %{php_base}-pear
 BuildRequires: zlib-devel
 Requires(post): %{php_base}-pear
 Requires(postun): %{php_base}-pear
-
-%if %{?php_zend_api}0
 Requires: php(zend-abi) = %{php_zend_api}
 Requires: php(api) = %{php_core_api}
-%else
-Requires: %{php_base}-api = %{php_apiver}
-%endif
 
 Provides:     php-pecl(%{pecl_name}) = %{version}
 Provides:     php-pecl(%{pecl_name})%{?_isa} = %{version}
@@ -116,12 +102,12 @@ EOF
 
 
 %post
-%{__pecl} install --nodeps --soft --force --register-only --nobuild %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+%{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
 
 
 %postun
 if [ $1 -eq 0 ]; then
-%{__pecl} uninstall --nodeps --ignore-errors --register-only %{pecl_name} >/dev/null || :
+    %{pecl_uninstall} %{pecl_name} >/dev/null || :
 fi
 
 
