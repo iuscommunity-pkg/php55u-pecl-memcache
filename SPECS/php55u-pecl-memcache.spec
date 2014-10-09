@@ -51,44 +51,47 @@ handy OO and procedural interfaces.
 
 Memcache can be used as a PHP session handler.
 
-%prep 
+
+%prep
 %setup -c -n %{real_name}-%{version} -q
-%{_bindir}/php %{SOURCE2} package.xml >CHANGELOG
+mv %{pecl_name}-%{version} NTS
+%{_bindir}/php %{SOURCE2} package.xml > CHANGELOG
 
-
-%build
-cd %{pecl_name}-%{version}
-phpize
-%configure
-%{__make} %{?_smp_mflags}
-
-
-%install
-cd %{pecl_name}-%{version}
-%{__make} install INSTALL_ROOT=%{buildroot}
-
-# Drop in the bit of configuration
-%{__mkdir_p} %{buildroot}%{php_inidir}
-%{__cat} > %{buildroot}%{php_inidir}/%{ini_name} << 'EOF'
-; Enable %{pecl_name} extension module
+%{__cat} > %{ini_name} << 'EOF'
+; ----- Enable %{pecl_name} extension module
 extension=%{pecl_name}.so
 
-; Options for the %{pecl_name} module
+; ----- Options for the %{pecl_name} module
+; see http://www.php.net/manual/en/memcache.ini.php
 
 ; Whether to transparently failover to other servers on errors
 ;memcache.allow_failover=1
-; Defines how many servers to try when setting and getting data.
-;memcache.max_failover_attempts=20
 ; Data will be transferred in chunks of this size
-;memcache.chunk_size=8192
+;memcache.chunk_size=32768
+; Autocompress large data
+;memcache.compress_threshold=20000
 ; The default TCP port number to use when connecting to the memcached server 
 ;memcache.default_port=11211
 ; Hash function {crc32, fnv}
 ;memcache.hash_function=crc32
 ; Hash strategy {standard, consistent}
-;memcache.hash_strategy=standard
+;memcache.hash_strategy=consistent
+; Defines how many servers to try when setting and getting data.
+;memcache.max_failover_attempts=20
+;  The protocol {ascii, binary} : You need a memcached >= 1.3.0 to use the binary protocol
+;  The binary protocol results in less traffic and is more efficient
+;memcache.protocol=ascii
+;  Redundancy : When enabled the client sends requests to N servers in parallel
+;memcache.redundancy=1
+;memcache.session_redundancy=2
+;  Lock Timeout
+;memcache.lock_timeout = 15
 
-; Options to use the memcache session handler
+; ----- Options to use the memcache session handler
+
+; RPM note : save_handler and save_path are defined
+; for mod_php, in /etc/httpd/conf.d/php.conf
+; for php-fpm, in /etc/php-fpm.d/*conf
 
 ; Use memcache as a session handler
 ;session.save_handler=memcache
@@ -96,10 +99,40 @@ extension=%{pecl_name}.so
 ;session.save_path="tcp://localhost:11211?persistent=1&weight=1&timeout=1&retry_interval=15"
 EOF
 
+cp -r NTS ZTS
+
+
+%build
+cd NTS
+%{_bindir}/phpize
+%configure --with-php-config=%{_bindir}/php-config
+%{__make} %{?_smp_mflags}
+
+cd ../ZTS
+%{_bindir}/zts-phpize
+%configure --with-php-config=%{_bindir}/zts-php-config
+%{__make} %{?_smp_mflags}
+
+
+%install
+%{__make} -C NTS install INSTALL_ROOT=%{buildroot}
+%{__install} -D -m 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
+
+%{__make} -C ZTS install INSTALL_ROOT=%{buildroot}
+%{__install} -D -m 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
+
 # Install XML package description
-# use 'name' rather than 'pecl_name' to avoid conflict with pear extensions
-%{__mkdir_p} %{buildroot}%{pecl_xmldir}
-%{__install} -m 644 ../package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
+%{__install} -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
+
+# Test & Documentation
+for i in $(grep 'role="test"' package.xml | sed -e 's/^.*name="//;s/".*$//')
+do %{__install} -Dpm 644 NTS/$i %{buildroot}%{pecl_testdir}/%{pecl_name}/$i
+done
+for i in $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
+do %{__install} -Dpm 644 NTS/$i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
+done
+%{__install} -Dpm 644 CHANGELOG %{buildroot}%{pecl_docdir}/%{pecl_name}/CHANGELOG
+
 
 
 %post
@@ -113,10 +146,14 @@ fi
 
 
 %files
-%doc CHANGELOG %{pecl_name}-%{version}/CREDITS %{pecl_name}-%{version}/README %{pecl_name}-%{version}/example.php
+%doc %{pecl_docdir}/%{pecl_name}
+%doc %{pecl_testdir}/%{pecl_name}
 %{pecl_xmldir}/%{name}.xml
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
+%config(noreplace) %{php_ztsinidir}/%{ini_name}
+%{php_ztsextdir}/%{pecl_name}.so
+
 
 
 %changelog
