@@ -134,6 +134,16 @@ done
 %{__install} -Dpm 644 CHANGELOG %{buildroot}%{pecl_docdir}/%{pecl_name}/CHANGELOG
 
 
+%check
+: Minimal load test for NTS extension
+%{__php} --no-php-ini \
+    --define extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
+    -m | grep %{pecl_name}
+
+: Minimal load test for ZTS extension
+%{__ztsphp} --no-php-ini \
+    --define extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
+    -m | grep %{pecl_name}
 
 %post
 %{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
