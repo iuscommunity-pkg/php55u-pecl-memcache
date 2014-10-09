@@ -23,12 +23,11 @@ URL: http://pecl.php.net/package/%{pecl_name}
 Source: http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 Source2: xml2changelog
 
-BuildRequires: %{php_base}-devel, %{php_base}-cli, %{php_base}-pear, zlib-devel
-Provides: php-pecl(%{pecl_name}) = %{version}-%{release}
-Provides: %{real_name} = %{version}-%{release}
-Conflicts: %{real_name} < %{basever}
-Requires(post): %{__pecl}
-Requires(postun): %{__pecl}
+BuildRequires: %{php_base}-devel
+BuildRequires: %{php_base}-pear
+BuildRequires: zlib-devel
+Requires(post): %{php_base}-pear
+Requires(postun): %{php_base}-pear
 
 %if %{?php_zend_api}0
 Requires: php(zend-abi) = %{php_zend_api}
@@ -36,6 +35,18 @@ Requires: php(api) = %{php_core_api}
 %else
 Requires: %{php_base}-api = %{php_apiver}
 %endif
+
+Provides:     php-pecl(%{pecl_name}) = %{version}
+Provides:     php-pecl(%{pecl_name})%{?_isa} = %{version}
+Provides:     php-%{pecl_name} = %{version}
+Provides:     php-%{pecl_name}%{?_isa} = %{version}
+Provides:     %{php_base}-pecl(%{pecl_name}) = %{version}
+Provides:     %{php_base}-pecl(%{pecl_name})%{?_isa} = %{version}
+Provides:     %{php_base}-%{pecl_name} = %{version}
+Provides:     %{php_base}-%{pecl_name}%{?_isa} = %{version}
+Provides:     %{real_name} = %{version}-%{release}
+Conflicts:    %{real_name} < %{version}
+
 
 %description
 Memcached is a caching daemon designed especially for
